@@ -8,7 +8,6 @@ import requests
 import logger
 import telegram
 from dotenv import load_dotenv
-from telegram import Bot
 
 load_dotenv()
 
@@ -16,7 +15,8 @@ load_dotenv()
 PRAKTIKUM_TOKEN = os.getenv("PRAKTIKUM_TOKEN")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-YANDEX_HOMEWORK_STATUS = "https://praktikum.yandex.ru/api/user_api/homework_statuses/"
+YANDEX_HOMEWORK_STATUS = (
+    "https://praktikum.yandex.ru/api/user_api/homework_statuses/")
 bot_client = telegram.Bot(token=TELEGRAM_TOKEN)
 
 logging.basicConfig(
@@ -25,10 +25,12 @@ logging.basicConfig(
     format="%(asctime)s, %(levelname)s, %(name)s, %(message)s"
 )
 
+
 def parse_homework_status(homework):
     """Функция отвечает за возратс клиенту
     правильно сформулированного ответа.
-    В зависимости от параметра status вернёт разные варианты текста"""
+    В зависимости от параметра status вернёт
+     разные варианты текста"""
     homework_name = homework["homework_name"]
     if homework["status"] == "rejected":
         verdict = "К сожалению в работе нашлись ошибки."
@@ -47,7 +49,6 @@ def get_homework_statuses(current_timestamp):
     и ошибку не правильного формата json.
     При возникновении какой либо ошибки в телеграм бот выведет сообщение,
     соотвутствующее ошиьке"""
-
 
     server_name = "https://praktikum.yandex.ru/api/user_api/homework_statuses/"
     headers = {"'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'"}
@@ -80,7 +81,6 @@ def send_message(message, bot_client):
 
 
 def main():
-    bot_client = telegram.Bot(token=TELEGRAM_TOKEN)
     """начальное значение timestamp"""
     current_timestamp = int(time.time())
     """Фукция будет обращаться к серверу раз в 300 секунд,
@@ -90,8 +90,10 @@ def main():
         try:
             new_homework = get_homework_statuses(current_timestamp)
             if new_homework.get("homeworks"):
-                send_message(parse_homework_status(new_homework.get("homeworks")[0]))
-            current_timestamp = new_homework.get('current_date', current_timestamp)
+                send_message(parse_homework_status(
+                    new_homework.get("homeworks")[0]))
+            current_timestamp = new_homework.get(
+                'current_date', current_timestamp)
             time.sleep(300)
 
         except Exception as e:
