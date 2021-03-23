@@ -8,6 +8,7 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 
@@ -60,17 +61,17 @@ def get_homework_statuses(current_timestamp):
             params=params
         )
     except requests.exceptions.RequestException:
-        logger.error('Request exception occurred', exc_info=True)
+        logging.error('Request exception occurred', exc_info=True)
         send_message('Request exception occurred', bot_client)
         return {}
     try:
         YP_request = homework_statuses.json()
     except json.decoder.JSONDecodeError:
-        logger.error('JSONDecodeError occurred', exc_info=True)
+        logging.error('JSONDecodeError occurred', exc_info=True)
         send_message('JSONDecodeError occurred', bot_client)
         return {}
     if 'error' in YP_request:
-        logger.error(YP_request['error'])
+        logging.error(YP_request['error'])
         send_message(YP_request['error'], bot_client)
     return YP_request
 
