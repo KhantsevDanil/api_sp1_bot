@@ -8,8 +8,6 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
-import logger
-
 load_dotenv()
 
 
