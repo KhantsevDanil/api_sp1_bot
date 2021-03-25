@@ -17,8 +17,10 @@ TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 YANDEX_HOMEWORK_STATUS = (
     'https://praktikum.yandex.ru/api/user_api/homework_statuses/')
+HEADERS = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
+SERVER_NAME = (
+        'https://praktikum.yandex.ru/api/user_api/homework_statuses/')
 bot_client = telegram.Bot(token=TELEGRAM_TOKEN)
-
 logging.basicConfig(
     level=logging.INFO,
     filename='main.log',
@@ -31,13 +33,16 @@ def parse_homework_status(homework):
     правильно сформулированного ответа.
     В зависимости от параметра status вернёт
      разные варианты текста"""
-    homework_name = homework["homework_name"]
-    if homework["status"] == "rejected":
-        verdict = 'К сожалению в работе нашлись ошибки.'
+    verdict_dict= {
+        'rejected': 'К сожалению в работе нашлись ошибки.',
+        'approved': 'Ревьюеру всё понравилось, можно приступать к следующему уроку.',
+    }
+    homework_name = homework.get('homework_name')
+    verdict_key = homework.get('status')
+    if homework_name is not None and verdict_key is not None:
+        return f'У вас проверили работу "{homework_name}"!\n\n{verdict_dict[verdict_key]}'
     else:
-        verdict = (
-            'Ревьюеру всё понравилось, можно приступать к следующему уроку.')
-    return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
+        return('боту пришли пустые данные')
 
 
 def get_homework_statuses(current_timestamp):
@@ -50,34 +55,31 @@ def get_homework_statuses(current_timestamp):
         и ошибку не правильного формата json.
         При возникновении какой либо ошибки в телеграм бот выведет сообщение,
         соотвутствующее ошиьке"""
-    server_name = (
-        'https://praktikum.yandex.ru/api/user_api/homework_statuses/')
-    headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
+    if current_timestamp is None:
+        current_timestamp = int(time.time())
     params = {'from_date': current_timestamp}
+
     try:
         homework_statuses = requests.get(
-            url=server_name,
-            headers=headers,
+            url=SERVER_NAME,
+            headers=HEADERS,
             params=params
         )
     except requests.exceptions.RequestException:
         logging.error('Request exception occurred', exc_info=True)
-        send_message('Request exception occurred', bot_client)
-        return {}
+        raise('Request exception occurred')
     try:
         YP_request = homework_statuses.json()
     except json.decoder.JSONDecodeError:
         logging.error('JSONDecodeError occurred', exc_info=True)
-        send_message('JSONDecodeError occurred', bot_client)
-        return {}
+        raise('JSONDecodeError occurred')
     if 'error' in YP_request:
         logging.error(YP_request['error'])
-        send_message(YP_request['error'], bot_client)
+        raise(YP_request['error'])
     return YP_request
 
 
 def send_message(message, bot_client):
-
     return bot_client.send_message(chat_id=CHAT_ID, text=message)
 
 
