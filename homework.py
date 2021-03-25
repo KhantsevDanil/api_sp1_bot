@@ -19,7 +19,7 @@ YANDEX_HOMEWORK_STATUS = (
     'https://praktikum.yandex.ru/api/user_api/homework_statuses/')
 HEADERS = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
 SERVER_NAME = (
-        'https://praktikum.yandex.ru/api/user_api/homework_statuses/')
+    'https://praktikum.yandex.ru/api/user_api/homework_statuses/')
 bot_client = telegram.Bot(token=TELEGRAM_TOKEN)
 logging.basicConfig(
     level=logging.INFO,
@@ -33,14 +33,16 @@ def parse_homework_status(homework):
     правильно сформулированного ответа.
     В зависимости от параметра status вернёт
      разные варианты текста"""
-    verdict_dict= {
+    verdict_dict = {
         'rejected': 'К сожалению в работе нашлись ошибки.',
-        'approved': 'Ревьюеру всё понравилось, можно приступать к следующему уроку.',
+        'approved': 'Ревьюеру всё понравилось,'
+                    ' можно приступать к следующему уроку.',
     }
     homework_name = homework.get('homework_name')
     verdict_key = homework.get('status')
     if homework_name is not None and verdict_key is not None:
-        return f'У вас проверили работу "{homework_name}"!\n\n{verdict_dict[verdict_key]}'
+        return (f'У вас проверили работу '
+                f'"{homework_name}"!\n\n{verdict_dict[verdict_key]}')
     else:
         return('боту пришли пустые данные')
 
