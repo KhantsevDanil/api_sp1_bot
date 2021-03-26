@@ -41,8 +41,9 @@ def parse_homework_status(homework):
     homework_name = homework.get('homework_name')
     verdict_key = homework.get('status')
     if homework_name is not None and verdict_key is not None:
+        buffer = verdict_dict[verdict_key]
         return (f'У вас проверили работу '
-                f'"{homework_name}"!\n\n{verdict_dict[verdict_key]}')
+                f'"{homework_name}"!\n\n{buffer}')
     else:
         return('боту пришли пустые данные')
 
